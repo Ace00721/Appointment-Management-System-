@@ -1,36 +1,22 @@
 import datetime
 
-
 class PaymentInfo:
-    def __init__(self, unavailable_dates=None):
-        """Initializes a payment record with user input and checks for unavailable dates."""
+    def __init__(self, pay_date: str, pay_total: float, pay_user: str, unavailable_dates=None):
+        """Initializes a payment record and checks for unavailable dates."""
         if unavailable_dates is None:
             unavailable_dates = []
 
-        while True:
-            self.pay_date = input("Enter payment date (MM-DD): ")
-            try:
-                date_obj = datetime.datetime.strptime(self.pay_date, "%m-%d").date()
-                if self.pay_date in unavailable_dates:
-                    print("Error: Selected date is unavailable. Please choose another date.")
-                else:
-                    break
-            except ValueError:
-                print("Error: Invalid date format. Please enter a valid date (MM-DD).")
+        try:
+            datetime.datetime.strptime(pay_date, "%m-%d")  # Validate date format
+            if pay_date in unavailable_dates:
+                raise ValueError(f"Error: {pay_date} is unavailable for payments. Choose another date.")
+        except ValueError as e:
+            raise ValueError(f"Invalid date or format: {e}")
 
-        self.pay_total = float(input("Enter payment amount: "))
-        self.pay_user = input("Enter name of user making the payment: ")
-
-    def set_payment(self, payment: float):
-        """Sets the payment amount."""
-        self.pay_total = payment
+        self.pay_date = pay_date
+        self.pay_total = pay_total
+        self.pay_user = pay_user
 
     def display_payment(self):
         """Displays payment details."""
         return f"Payment Details:\nDate: {self.pay_date}\nTotal: ${self.pay_total:.2f}\nUser: {self.pay_user}"
-
-
-"Sets dates for unavailable dates "
-unavailable_dates = ["03-20","03-25"]
-payment = PaymentInfo(unavailable_dates)
-print(payment.display_payment())
