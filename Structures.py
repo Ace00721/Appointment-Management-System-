@@ -1,5 +1,5 @@
 import datetime
-from PaymentInfo import PaymentInfo
+from paymentinfo2 import PaymentInfo
 
 
 class FinancialRecords:
@@ -7,9 +7,16 @@ class FinancialRecords:
         self.records = []  # List to store PaymentInfo objects
         self.unavailable_dates = ["03-20", "03-25"]  # Example unavailable dates
 
-    def add_record(self, client_name, amount, date):
+    def add_record(self, client_name, amount, date, service_name=None, service_choice=None):
         try:
-            payment = PaymentInfo(date, amount, client_name, self.unavailable_dates)
+            payment = PaymentInfo(
+                pay_date=date,
+                pay_user=client_name,
+                service_choice=service_choice,
+                service_name=service_name,
+                service_price=amount,
+                unavailable_dates=self.unavailable_dates
+            )
             self.records.append(payment)
         except ValueError as e:
             print(e)
@@ -57,9 +64,9 @@ class Admin:
     def display_info(self):
         return f"Admin Name: {self.name}\nContact Info: {self.contact_info}"
 
-    def add_client_payment(self, client, amount, date):
-        client.financial_records.add_record(client.name, amount, date)
-        self.financial_records.add_record(client.name, amount, date)
+    def add_client_payment(self, client, amount, date, service_name=None, service_choice=None):
+        client.financial_records.add_record(client.name, amount, date, service_name, service_choice)
+        self.financial_records.add_record(client.name, amount, date, service_name, service_choice)
 
     def schedule_appointment(self, client, date, time):
         client.appointments.add_appointment(client.name, date, time)
@@ -91,46 +98,3 @@ class Admin:
 
     def gen_app_sch(self):
         return self.appointments.get_appointments()
-
-
-# Example usage
-admin1 = Admin("John Doe", "johndoe@example.com")
-client1 = Client("Client A", "clienta@example.com")
-client2 = Client("Client B", "clientb@example.com")
-client3 = Client("Client C", "clientc@example.com")
-
-admin1.add_client_payment(client1, 500, "03-19")
-admin1.add_client_payment(client1, 200, "03-20")  # Should show an error due to unavailable date
-admin1.add_client_payment(client2, 300, "03-21")
-admin1.add_client_payment(client2, 150, "03-22")
-admin1.add_client_payment(client3, 700, "03-23")
-admin1.add_client_payment(client3, 400, "03-25")  # Should show an error due to unavailable date
-
-admin1.schedule_appointment(client1, "03-21", "10:00 AM")
-admin1.schedule_appointment(client1, "03-24", "11:00 AM")
-admin1.schedule_appointment(client2, "03-22", "2:00 PM")
-admin1.schedule_appointment(client2, "03-25", "3:00 PM")
-admin1.schedule_appointment(client3, "03-23", "1:00 PM")
-admin1.schedule_appointment(client3, "03-26", "4:00 PM")
-
-print(admin1.display_info())
-print("Financial Records:", admin1.financial_records.get_records())
-print("Appointments:", admin1.appointments.get_appointments())
-print("Total Revenue:", admin1.display_financial())
-print("Client Report (Client A):", admin1.gen_client_rep(client1))
-print("Client Report (Client B):", admin1.gen_client_rep(client2))
-print("Client Report (Client C):", admin1.gen_client_rep(client3))
-print("Financial Report:", admin1.gen_fin_rep())
-print("Appointment Schedule:", admin1.gen_app_sch())
-
-print(client1.display_info())
-print("Client A Financial Records:", client1.financial_records.get_records())
-print("Client A Appointments:", client1.appointments.get_appointments())
-
-print(client2.display_info())
-print("Client B Financial Records:", client2.financial_records.get_records())
-print("Client B Appointments:", client2.appointments.get_appointments())
-
-print(client3.display_info())
-print("Client C Financial Records:", client3.financial_records.get_records())
-print("Client C Appointments:", client3.appointments.get_appointments())
