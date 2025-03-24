@@ -3,17 +3,14 @@ from datetime import ((datetime, timedelta))
 
 class AppointmentCalendar:
     def __init__(self):
-        """
-        Stores appointments as {date_string: [time_slots]}
-        """
+        #stores appointments as {date_string: [time_slots]}
         self.calendar = {}
 
     def add_appointment(self, date_str, time_str, client_name):
-        """
-        Adds an appointment for a given date and time.
-        date_str: 'YYYY-MM-DD'
-        time_str: 'HH:MM' (24-hour format)
-        """
+        #adds an appointment for a given date and time.
+        #date_str: 'YYYY-MM-DD'
+        #time_str: 'HH:MM' (24-hour format)
+        
         key = date_str
         time_slot = f"{time_str} - {client_name}"
 
@@ -28,9 +25,8 @@ class AppointmentCalendar:
         print(f" Appointment booked for {date_str} at {time_str} for {client_name}")
 
     def remove_appointment(self, date_str, time_str):
-        """
-        Removes an appointment based on date and time.
-        """
+        #removes an appointment based on date and time.
+        
         key = date_str
         if key in self.calendar:
             for i, slot in enumerate(self.calendar[key]):
@@ -43,9 +39,8 @@ class AppointmentCalendar:
             print("No appointments found on that date.")
 
     def view_appointments(self, date_str):
-        """
-        Shows all appointments for a given date.
-        """
+        #shows all appointments for a given date.
+        
         if date_str in self.calendar:
             print(f"Appointments on {date_str}:")
             for slot in sorted(self.calendar[date_str]):
