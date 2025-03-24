@@ -15,3 +15,9 @@ class AppointmentInfo:
 
     def show_summ(self):
         return f"Appointment Summary: \nDate: {self.app_date} \nTime: {self.app_time} \nEmployee: {self.app_employee} \n Request: {self.app_request} \nService: {self.app_service}"
+
+# Example Usage
+if __name__ == "__main__":
+    appointment = AppointmentInfo("2025-05-20", "10:00 AM", "Kyle", "Tattoo", "Standard")
+    print(appointment.display_date())
+    print(appointment.show_summ())
