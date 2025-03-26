@@ -8,12 +8,13 @@ class AuthManager:
         self.create_users_table()
 
     def create_users_table(self):
-        """Creates the users table if it doesn't exist."""
+        """Creates the users table with role differentiation."""
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE,
-                password TEXT
+                password TEXT,
+                role TEXT CHECK(role IN ('admin', 'client')) NOT NULL
             )
         ''')
         self.conn.commit()
@@ -22,27 +23,28 @@ class AuthManager:
         """Hashes a password using SHA-256."""
         return hashlib.sha256(password.encode()).hexdigest()
 
-    def register(self, username, password):
-        """Registers a new user."""
+    def register(self, username, password, role):
+        """Registers a new user as either 'admin' or 'client'."""
         hashed_password = self.hash_password(password)
         try:
-            self.cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+            self.cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, hashed_password, role))
             self.conn.commit()
-            print("User registered successfully!")
+            print(f"{role.capitalize()} account created successfully!")
         except sqlite3.IntegrityError:
             print("Error: Username already exists. Choose another one.")
 
     def login(self, username, password):
-        """Logs in a user by checking hashed password."""
+        """Logs in a user and returns their role."""
         hashed_password = self.hash_password(password)
-        self.cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hashed_password))
+        self.cursor.execute("SELECT role FROM users WHERE username = ? AND password = ?", (username, hashed_password))
         user = self.cursor.fetchone()
         if user:
-            print("Login successful! Welcome,", username)
-            return True  # Login success
+            role = user[0]
+            print(f"Login successful! Welcome, {username} ({role.capitalize()})")
+            return role  # Return role for access control
         else:
             print("Invalid username or password.")
-            return False  # Login failed
+            return None  # Login failed
 
     def close(self):
         """Closes the database connection."""
@@ -57,13 +59,21 @@ if __name__ == "__main__":
         if choice == 'r':
             username = input("Enter a username: ")
             password = input("Enter a password: ")
-            auth.register(username, password)
+            role = input("Enter account type ('admin' or 'client'): ").lower()
+            if role not in ["admin", "client"]:
+                print("Invalid role. Please enter 'admin' or 'client'.")
+            else:
+                auth.register(username, password, role)
         elif choice == 'l':
             username = input("Enter your username: ")
             password = input("Enter your password: ")
-            if auth.login(username, password):
-                print("Access granted!")
-                break  # Exit loop after successful login
+            role = auth.login(username, password)
+            if role == "admin":
+                print("Access granted! You have admin privileges.")
+                # Call admin dashboard or functionalities here
+            elif role == "client":
+                print("Access granted! You have client privileges.")
+                # Call client dashboard or functionalities here
         elif choice == 'q':
             break
         else:
