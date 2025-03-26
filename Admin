@@ -1,0 +1,112 @@
+import datetime
+from database import DatabaseManager
+
+
+class FinancialRecords:
+    def __init__(self, db: DatabaseManager):
+        self.db = db
+
+    def add_record(self, client_id, amount, date):
+        self.db.add_payment(client_id, amount, date)
+
+    def get_records(self):
+        return self.db.get_payments()
+
+    def total_revenue(self):
+        return sum(payment[2] for payment in self.db.get_payments())
+
+
+class Appointments:
+    def __init__(self, db: DatabaseManager):
+        self.db = db
+
+    def add_appointment(self, client_id, date, time):
+        self.db.add_appointment(client_id, date, time)
+
+    def get_appointments(self):
+        return self.db.get_appointments()
+
+
+class Client:
+    def __init__(self, name: str, contact_info: str, db: DatabaseManager):
+        self.name = name
+        self.contact_info = contact_info
+        self.db = db
+        self.db.add_client(name, contact_info)
+
+    def display_info(self):
+        return f"Client Name: {self.name}\nContact Info: {self.contact_info}"
+
+
+class Admin:
+    def __init__(self, name: str, contact_info: str, db: DatabaseManager):
+        self.name = name
+        self.contact_info = contact_info
+        self.db = db
+        self.financial_records = FinancialRecords(db)
+        self.appointments = Appointments(db)
+        self.db.add_admin(name, contact_info)
+
+    def display_info(self):
+        return f"Admin Name: {self.name}\nContact Info: {self.contact_info}"
+
+    def add_client_payment(self, client_id, amount, date):
+        self.financial_records.add_record(client_id, amount, date)
+
+    def schedule_appointment(self, client_id, date, time):
+        self.appointments.add_appointment(client_id, date, time)
+
+    def view_client_records(self, client_id):
+        return self.db.get_client_payments(client_id)
+
+    def view_client_appointments(self, client_id):
+        return self.db.get_client_appointments(client_id)
+
+    def display_financial(self):
+        return f"Total Revenue: ${self.financial_records.total_revenue()}"
+
+    def gen_client_rep(self, client_id):
+        return {
+            "Client Info": self.db.get_clients(),
+            "Appointments": self.db.get_client_appointments(client_id),
+            "Payments": self.db.get_client_payments(client_id)
+        }
+
+    def gen_fin_rep(self):
+        return {
+            "Total Revenue": self.financial_records.total_revenue(),
+            "Financial Records": self.financial_records.get_records()
+        }
+
+    def gen_app_sch(self):
+        return self.appointments.get_appointments()
+
+
+# Example usage
+db = DatabaseManager()
+admin1 = Admin("John Doe", "johndoe@example.com", db)
+client1 = Client("Client A", "clienta@example.com", db)
+client2 = Client("Client B", "clientb@example.com", db)
+client3 = Client("Client C", "clientc@example.com", db)
+
+clients = db.get_clients()
+client1_id = clients[0][0]  # Fetch first client ID
+client2_id = clients[1][0]  # Fetch second client ID
+client3_id = clients[2][0]  # Fetch third client ID
+
+admin1.add_client_payment(client1_id, 500, "03-19")
+admin1.add_client_payment(client2_id, 300, "03-21")
+admin1.add_client_payment(client3_id, 700, "03-23")
+
+admin1.schedule_appointment(client1_id, "03-21", "10:00 AM")
+admin1.schedule_appointment(client2_id, "03-22", "2:00 PM")
+admin1.schedule_appointment(client3_id, "03-23", "1:00 PM")
+
+print("Clients:", db.get_clients())
+print("Payments:", db.get_payments())
+print("Appointments:", db.get_appointments())
+print("Client Report (Client A):", admin1.gen_client_rep(client1_id))
+print("Financial Report:", admin1.gen_fin_rep())
+print("Appointment Schedule:", admin1.gen_app_sch())
+
+db.close()
