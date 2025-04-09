@@ -35,5 +35,26 @@ def create_account():
     }
 
     print(f" Account for '{username}' created successfully!")
+def view_accounts():  # For testing/demo only
+    print("\n Current Accounts:")
+    for user, info in accounts.items():
+        print(f" - {user}: {info}")
+    print()
+
+# Main loop
+while True:
+    print("\n1. Create Account\n2. View Accounts (demo)\n3. Exit")
+    choice = input("Choose an option: ")
+
+    if choice == '1':
+        create_account()
+    elif choice == '2':
+        view_accounts()
+    elif choice == '3':
+        break
+    else:
+        print("Invalid choice. Try again.")
+
+
 
 
