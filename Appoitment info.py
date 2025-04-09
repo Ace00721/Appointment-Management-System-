@@ -1,5 +1,5 @@
 class AppointmentInfo:
-    def __init__(self, app_date: str, app_time: str, app_employee: str, app_servicet: str, app_payment: str):
+    def __init__(self, app_date: str, app_time: str, app_employee: str, app_service: str, app_payment: str):
         self.app_date = app_date
         self.app_time = app_time
         self.app_client = app_client
