@@ -1,4 +1,4 @@
-accounts = {}  # store accounts: {username: {password, email, phone}}
+accounts = {}  # stores accounts: {username: {password, email, phone}}
 
 def create_account():
     print("Create a New Account")
@@ -11,7 +11,7 @@ def create_account():
     email = input("Enter your email: ").strip()
     phone = input("Enter your phone number: ").strip()
 
-    # check for duplicate email or phone
+    # checks for duplicate email or phone
     for user_info in accounts.values():
         if user_info["email"] == email:
             print(" This email is already in use.")
@@ -27,7 +27,7 @@ def create_account():
         print("Passwords do not match.")
         return
 
-    # Save account
+    # saves account
     accounts[username] = {
         "password": password,
         "email": email,
@@ -41,7 +41,6 @@ def view_accounts():  # For testing/demo only
         print(f" - {user}: {info}")
     print()
 
-# Main loop
 while True:
     print("\n1. Create Account\n2. View Accounts (demo)\n3. Exit")
     choice = input("Choose an option: ")
