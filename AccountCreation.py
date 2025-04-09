@@ -35,7 +35,7 @@ def create_account():
     }
 
     print(f" Account for '{username}' created successfully!")
-def view_accounts():  # For testing/demo only
+def view_accounts():  
     print("\n Current Accounts:")
     for user, info in accounts.items():
         print(f" - {user}: {info}")
