@@ -36,7 +36,7 @@ class AppointmentCalendar:
                     return
             print("No appointment found at that time.")
         else:
-            print("No appointments found on that date.")
+            print("No appointment found on that date.")
 
     def view_appointments(self, date_str):
         #shows all appointments for a given date.
@@ -46,7 +46,6 @@ class AppointmentCalendar:
             for slot in sorted(self.calendar[date_str]):
                 print(f" - {slot}")
         else:
-            print(f"No appointments found on {date_str}.")
-
+            print(f"No appointment found on {date_str}.")
 
 
