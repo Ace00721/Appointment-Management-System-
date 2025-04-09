@@ -1,7 +1,6 @@
 import datetime
 from database import DatabaseManager
 
-
 class FinancialRecords:
     def __init__(self, db: DatabaseManager):
         self.db = db
@@ -15,7 +14,6 @@ class FinancialRecords:
     def total_revenue(self):
         return sum(payment[2] for payment in self.db.get_payments())
 
-
 class Appointments:
     def __init__(self, db: DatabaseManager):
         self.db = db
@@ -26,7 +24,6 @@ class Appointments:
     def get_appointments(self):
         return self.db.get_appointments()
 
-
 class Client:
     def __init__(self, name: str, contact_info: str, db: DatabaseManager):
         self.name = name
@@ -36,7 +33,6 @@ class Client:
 
     def display_info(self):
         return f"Client Name: {self.name}\nContact Info: {self.contact_info}"
-
 
 class Admin:
     def __init__(self, name: str, contact_info: str, db: DatabaseManager):
