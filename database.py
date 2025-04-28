@@ -96,6 +96,10 @@ class DatabaseManager:
         """Closes the database connection."""
         self.conn.close()
 
+    def delete_appointment(self, appointment_id):
+        with self.conn:
+            self.conn.execute("DELETE FROM appointments WHERE id = ?", (appointment_id,))
+
 
 # # Example Usage
 # if __name__ == "__main__":
