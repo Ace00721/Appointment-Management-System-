@@ -35,12 +35,16 @@ class DatabaseManager:
         )
         """)
 
+        # UPDATED appointments table with service, provider, and price
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS appointments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
+            service TEXT,
+            provider TEXT,
+            price REAL,
             FOREIGN KEY (client_id) REFERENCES clients(id)
         )
         """)
@@ -62,14 +66,21 @@ class DatabaseManager:
         self.cursor.execute("INSERT INTO payments (client_id, amount, date) VALUES (?, ?, ?)", (client_id, amount, date))
         self.conn.commit()
 
-    def add_appointment(self, client_id, date, time):
-        """Adds an appointment for a client."""
-        self.cursor.execute("INSERT INTO appointments (client_id, date, time) VALUES (?, ?, ?)", (client_id, date, time))
+    # UPDATED to accept service, provider, price
+    def add_appointment(self, client_id, date, time, service=None, provider=None, price=None):
+        """Adds an appointment for a client with optional service details."""
+        self.cursor.execute("""
+        INSERT INTO appointments (client_id, date, time, service, provider, price)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (client_id, date, time, service, provider, price))
         self.conn.commit()
 
-    def get_clients(self):
-        """Retrieves all clients."""
-        self.cursor.execute("SELECT * FROM clients")
+    def get_appointments(self):
+        """Retrieves all appointments with extra details."""
+        self.cursor.execute("""
+            SELECT date, time, service, provider, price 
+            FROM appointments
+        """)
         return self.cursor.fetchall()
 
     def get_payments(self):
@@ -97,27 +108,10 @@ class DatabaseManager:
         self.conn.close()
 
     def delete_appointment(self, appointment_id):
+        """Deletes an appointment by ID."""
         with self.conn:
             self.conn.execute("DELETE FROM appointments WHERE id = ?", (appointment_id,))
 
-
-# # Example Usage
-# if __name__ == "__main__":
-#     db = DatabaseManager()
-#
-#     # Adding example data
-#     db.add_admin("John Doe", "johndoe@example.com")
-#     db.add_client("Client A", "clienta@example.com")
-#
-#     # Fetch client ID (assuming Client A was the first client added)
-#     clients = db.get_clients()
-#     client_id = clients[0][0]  # First client ID
-#
-#     db.add_payment(client_id, 500.0, "03-19")
-#     db.add_appointment(client_id, "03-21", "10:00 AM")
-#
-#     print("Clients:", db.get_clients())
-#     print("Payments:", db.get_payments())
-#     print("Appointments:", db.get_appointments())
-#
-#     db.close()
+    def get_clients(self):
+        self.cursor.execute("SELECT * FROM clients")
+        return self.cursor.fetchall()
