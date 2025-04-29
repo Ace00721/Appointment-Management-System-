@@ -140,9 +140,48 @@ class LoginApp:
             time_str = f"{hour}:00 AM" if hour < 12 else f"{hour - 12 if hour > 12 else 12}:00 PM"
             state = tk.NORMAL if time_str not in booked_times else tk.DISABLED
             ttk.Button(self.time_buttons_frame, text=time_str,
-                       command=lambda t=time_str: self.confirm_booking(self.selected_date, t), state=state).pack(pady=2)
+                       command=lambda t=time_str: self.select_service_and_provider(t), state=state).pack(pady=2)
 
-    def confirm_booking(self, date, time):
+    def select_service_and_provider(self, selected_time):
+        top = tk.Toplevel(self.root)
+        top.title("Select Service and Provider")
+
+        services = {
+            "Haircut": {"provider": "Alice", "price": 30},
+            "Massage": {"provider": "Bob", "price": 60},
+            "Manicure": {"provider": "Clara", "price": 25}
+        }
+
+        tk.Label(top, text="Select Service:").pack(pady=5)
+        service_var = tk.StringVar()
+        service_dropdown = ttk.Combobox(top, textvariable=service_var, values=list(services.keys()), state="readonly")
+        service_dropdown.pack(pady=5)
+
+        details_label = tk.Label(top, text="")
+        details_label.pack(pady=5)
+
+        def update_details(event):
+            service = service_var.get()
+            if service:
+                provider = services[service]["provider"]
+                price = services[service]["price"]
+                details_label.config(text=f"Provider: {provider}\nPrice: ${price}")
+
+        service_dropdown.bind("<<ComboboxSelected>>", update_details)
+
+        def confirm_service():
+            selected_service = service_var.get()
+            if not selected_service:
+                messagebox.showerror("Error", "Please select a service.")
+                return
+            provider = services[selected_service]["provider"]
+            price = services[selected_service]["price"]
+            top.destroy()
+            self.confirm_booking(self.selected_date, selected_time, selected_service, provider, price)
+
+        ttk.Button(top, text="Confirm", command=confirm_service).pack(pady=10)
+
+    def confirm_booking(self, date, time, service, provider, price):
         appointments = self.db.get_appointments()
         for appt in appointments:
             if appt[2] == date and appt[3] == time:
@@ -158,7 +197,8 @@ class LoginApp:
                 self.db.add_client(self.username, "")
                 client_id = self.db.get_clients()[-1][0]
             self.db.add_appointment(client_id, date, time)
-            messagebox.showinfo("Success", f"Appointment booked for {date} at {time}.")
+            messagebox.showinfo("Success",
+                                f"Appointment booked for {date} at {time}.\nService: {service}\nProvider: {provider}\nPrice: ${price}")
             self.show_time_slots(datetime.datetime.now().year, datetime.datetime.now().month, int(date.split('-')[1]))
 
         elif self.user_role == "admin":
@@ -179,7 +219,8 @@ class LoginApp:
                 self.db.add_client(client_name, client_contact)
                 client_id = self.db.get_clients()[-1][0]
                 self.db.add_appointment(client_id, date, time)
-                messagebox.showinfo("Success", f"Appointment booked for {client_name} on {date} at {time}.")
+                messagebox.showinfo("Success",
+                                    f"Appointment booked for {client_name} on {date} at {time}.\nService: {service}\nProvider: {provider}\nPrice: ${price}")
                 top.destroy()
                 self.show_time_slots(datetime.datetime.now().year, datetime.datetime.now().month, int(date.split('-')[1]))
 
@@ -195,12 +236,21 @@ class LoginApp:
             client_id = client_ids[0]
             appointments = self.db.get_client_appointments(client_id)
 
+            # Sort appointments by upcoming date and time
+            now = datetime.datetime.now()
+            appointments.sort(
+                key=lambda appt: datetime.datetime.strptime(f"{now.year}-{appt[2]} {appt[3]}", "%Y-%m-%d %I:%M %p"))
+
             for appt in appointments:
-                appt_text = f"{appt[2]} at {appt[3]}"
+                # Format date to "Month Day"
+                date_obj = datetime.datetime.strptime(f"{now.year}-{appt[2]}", "%Y-%m-%d")
+                date_str = date_obj.strftime("%B %d")
+                appt_text = f"{date_str} at {appt[3]}"
                 frame = tk.Frame(top)
                 frame.pack(fill='x', pady=2)
                 tk.Label(frame, text=appt_text, width=30, anchor='w').pack(side='left')
-                ttk.Button(frame, text="Cancel", command=lambda a_id=appt[0]: self.confirm_cancel(a_id, top)).pack(side='right')
+                ttk.Button(frame, text="Cancel", command=lambda a_id=appt[0]: self.confirm_cancel(a_id, top)).pack(
+                    side='right')
         else:
             tk.Label(top, text="No appointments found.").pack()
 
@@ -209,12 +259,22 @@ class LoginApp:
         top.title("All Appointments")
 
         appointments = self.db.get_appointments()
+
+        # Sort appointments by upcoming date and time
+        now = datetime.datetime.now()
+        appointments.sort(
+            key=lambda appt: datetime.datetime.strptime(f"{now.year}-{appt[2]} {appt[3]}", "%Y-%m-%d %I:%M %p"))
+
         for appt in appointments:
-            appt_text = f"ClientID {appt[1]}: {appt[2]} at {appt[3]}"
+            # Format date to "Month Day"
+            date_obj = datetime.datetime.strptime(f"{now.year}-{appt[2]}", "%Y-%m-%d")
+            date_str = date_obj.strftime("%B %d")
+            appt_text = f"ClientID {appt[1]}: {date_str} at {appt[3]}"
             frame = tk.Frame(top)
             frame.pack(fill='x', pady=2)
             tk.Label(frame, text=appt_text, width=40, anchor='w').pack(side='left')
-            ttk.Button(frame, text="Delete", command=lambda a_id=appt[0]: self.confirm_delete(a_id, top)).pack(side='right')
+            ttk.Button(frame, text="Delete", command=lambda a_id=appt[0]: self.confirm_delete(a_id, top)).pack(
+                side='right')
 
     def confirm_cancel(self, appointment_id, top_window):
         if messagebox.askyesno("Confirm Cancellation", "Are you sure you want to cancel this appointment?"):
