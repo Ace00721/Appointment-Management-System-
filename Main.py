@@ -23,7 +23,8 @@ class LoginApp:
         self.calendar_frame = None
         self.time_buttons_frame = None
 
-        self.inactivity_timeout = 15 * 60 * 1000  # 15 minutes in milliseconds
+        self.inactivity_timeout = 1 * 60 * 1000  # 15 minutes in milliseconds
+        self.inactivity_job = None
         self.last_activity_time = self.root.after(self.inactivity_timeout, self.auto_logout)
         self.root.bind_all("<Any-KeyPress>", self.reset_timer)
         self.root.bind_all("<Any-Button>", self.reset_timer)
@@ -65,10 +66,10 @@ class LoginApp:
         self.styled_button(self.login_frame, "Login", self.login).pack(pady=10)
         self.styled_button(self.login_frame, "Go to Register", self.setup_register_frame).pack()
 
-    def reset_timer(self, event=None):
-    if self.last_activity_time:
-        self.root.after_cancel(self.last_activity_time)
-    self.last_activity_time = self.root.after(self.inactivity_timeout, self.auto_logout)
+    def reset_inactivity_timer(self, event=None):
+    if self.inactivity_job:
+        self.root.after_cancel(self.inactivity_job)
+    self.inactivity_job = self.root.after(self.inactivity_timeout, self.auto_logout)
 
     def auto_logout(self):
         messagebox.showinfo("Logged Out", "You have been logged out due to inactivity.")
@@ -100,6 +101,11 @@ class LoginApp:
         self.clear_frame_widgets(self.dashboard_frame)
         self.dashboard_frame.pack(padx=10, pady=10)
 
+        self.root.bind_all("<Any-KeyPress>", self.reset_inactivity_timer)
+        self.root.bind_all("<Any-Button>", self.reset_inactivity_timer)
+        self.root.bind_all("<Motion>", self.reset_inactivity_timer)
+        self.reset_inactivity_timer()  # Start the timer
+
         self.styled_button(self.dashboard_frame, "Log Out", self.logout, style="Danger.TButton").pack(pady=(0, 10))
         self.styled_label(self.dashboard_frame, f"Welcome {self.username}! ({self.user_role})").pack(pady=(0, 10))
 
@@ -115,6 +121,9 @@ class LoginApp:
         if self.last_activity_time:
             self.root.after_cancel(self.last_activity_time)
             self.last_activity_time = None
+        self.root.unbind_all("<Any-KeyPress>")
+        self.root.unbind_all("<Any-Button>")
+        self.root.unbind_all("<Motion>")
         if messagebox.askyesno("Confirm Logout", "Are you sure you want to log out?"):
             self.username = None
             self.user_role = None
