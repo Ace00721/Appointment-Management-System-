@@ -1,5 +1,15 @@
 accounts = {}  # stores accounts: {username: {password, email, phone}}
+"""
+    Prompts the user to create a new account.
 
+    Checks for:
+    - Duplicate usernames
+    - Duplicate emails
+    - Duplicate phone numbers
+    - Matching password confirmation
+
+    On success, adds the account to the `accounts` dictionary.
+"""
 def create_account():
     print("Create a New Account")
     username = input("Enter a username: ").strip()
