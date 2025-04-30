@@ -2,7 +2,16 @@ import hashlib
 import sqlite3
 
 class AuthManager:
+    """
+    Manages authentication using SQLite. Supports registration, login, and secure password hashing.
+    """
     def __init__(self, db_name="business.db"):
+        """
+        Initializes the authentication system and connects to the SQLite database.
+
+        Args:
+            db_name (str): Name of the SQLite database file. Defaults to "business.db".
+        """
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_users_table()
