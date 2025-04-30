@@ -23,6 +23,12 @@ class LoginApp:
         self.calendar_frame = None
         self.time_buttons_frame = None
 
+        self.inactivity_timeout = 15 * 60 * 1000  # 15 minutes in milliseconds
+        self.last_activity_time = self.root.after(self.inactivity_timeout, self.auto_logout)
+        self.root.bind_all("<Any-KeyPress>", self.reset_timer)
+        self.root.bind_all("<Any-Button>", self.reset_timer)
+        self.root.bind_all("<Motion>", self.reset_timer) 
+
         self.setup_login_frame()
 
     def clear_frames(self):
@@ -58,6 +64,15 @@ class LoginApp:
 
         self.styled_button(self.login_frame, "Login", self.login).pack(pady=10)
         self.styled_button(self.login_frame, "Go to Register", self.setup_register_frame).pack()
+
+    def reset_timer(self, event=None):
+    if self.last_activity_time:
+        self.root.after_cancel(self.last_activity_time)
+    self.last_activity_time = self.root.after(self.inactivity_timeout, self.auto_logout)
+
+    def auto_logout(self):
+        messagebox.showinfo("Logged Out", "You have been logged out due to inactivity.")
+        self.logout()
 
     def setup_register_frame(self):
         self.clear_frames()
@@ -96,7 +111,10 @@ class LoginApp:
         self.styled_label(self.dashboard_frame, "Book an Appointment").pack(pady=(10, 0))
         self.show_calendar()
 
-    def logout(self):
+    def logout(self)
+        if self.last_activity_time:
+            self.root.after_cancel(self.last_activity_time)
+            self.last_activity_time = None
         if messagebox.askyesno("Confirm Logout", "Are you sure you want to log out?"):
             self.username = None
             self.user_role = None
