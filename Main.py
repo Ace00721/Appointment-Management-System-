@@ -23,12 +23,8 @@ class LoginApp:
         self.calendar_frame = None
         self.time_buttons_frame = None
 
-        self.inactivity_timeout = 1 * 60 * 1000  # 15 minutes in milliseconds
+        self.inactivity_timeout = 5 * 60 * 1000  # 5 minutes in milliseconds
         self.inactivity_job = None
-        self.last_activity_time = self.root.after(self.inactivity_timeout, self.auto_logout)
-        self.root.bind_all("<Any-KeyPress>", self.reset_timer)
-        self.root.bind_all("<Any-Button>", self.reset_timer)
-        self.root.bind_all("<Motion>", self.reset_timer) 
 
         self.setup_login_frame()
 
@@ -67,9 +63,9 @@ class LoginApp:
         self.styled_button(self.login_frame, "Go to Register", self.setup_register_frame).pack()
 
     def reset_inactivity_timer(self, event=None):
-    if self.inactivity_job:
-        self.root.after_cancel(self.inactivity_job)
-    self.inactivity_job = self.root.after(self.inactivity_timeout, self.auto_logout)
+        if self.inactivity_job:
+            self.root.after_cancel(self.inactivity_job)
+        self.inactivity_job = self.root.after(self.inactivity_timeout, self.auto_logout)
 
     def auto_logout(self):
         messagebox.showinfo("Logged Out", "You have been logged out due to inactivity.")
@@ -117,10 +113,10 @@ class LoginApp:
         self.styled_label(self.dashboard_frame, "Book an Appointment").pack(pady=(10, 0))
         self.show_calendar()
 
-    def logout(self)
-        if self.last_activity_time:
-            self.root.after_cancel(self.last_activity_time)
-            self.last_activity_time = None
+    def logout(self):
+        if self.inactivity_job:
+            self.root.after_cancel(self.inactivity_job)
+            self.inactivity_job = None
         self.root.unbind_all("<Any-KeyPress>")
         self.root.unbind_all("<Any-Button>")
         self.root.unbind_all("<Motion>")
@@ -263,21 +259,18 @@ class LoginApp:
             client_id = client_ids[0]
             appointments = self.db.get_client_appointments(client_id)
 
-            # Sort appointments by upcoming date and time
             now = datetime.datetime.now()
             appointments.sort(
                 key=lambda appt: datetime.datetime.strptime(f"{now.year}-{appt[2]} {appt[3]}", "%Y-%m-%d %I:%M %p"))
 
             for appt in appointments:
-                # Format date to "Month Day"
                 date_obj = datetime.datetime.strptime(f"{now.year}-{appt[2]}", "%Y-%m-%d")
                 date_str = date_obj.strftime("%B %d")
                 appt_text = f"{date_str} at {appt[3]}"
                 frame = tk.Frame(top)
                 frame.pack(fill='x', pady=2)
                 tk.Label(frame, text=appt_text, width=30, anchor='w').pack(side='left')
-                ttk.Button(frame, text="Cancel", command=lambda a_id=appt[0]: self.confirm_cancel(a_id, top)).pack(
-                    side='right')
+                ttk.Button(frame, text="Cancel", command=lambda a_id=appt[0]: self.confirm_cancel(a_id, top)).pack(side='right')
         else:
             tk.Label(top, text="No appointments found.").pack()
 
@@ -287,21 +280,18 @@ class LoginApp:
 
         appointments = self.db.get_appointments()
 
-        # Sort appointments by upcoming date and time
         now = datetime.datetime.now()
         appointments.sort(
             key=lambda appt: datetime.datetime.strptime(f"{now.year}-{appt[2]} {appt[3]}", "%Y-%m-%d %I:%M %p"))
 
         for appt in appointments:
-            # Format date to "Month Day"
             date_obj = datetime.datetime.strptime(f"{now.year}-{appt[2]}", "%Y-%m-%d")
             date_str = date_obj.strftime("%B %d")
             appt_text = f"ClientID {appt[1]}: {date_str} at {appt[3]}"
             frame = tk.Frame(top)
             frame.pack(fill='x', pady=2)
             tk.Label(frame, text=appt_text, width=40, anchor='w').pack(side='left')
-            ttk.Button(frame, text="Delete", command=lambda a_id=appt[0]: self.confirm_delete(a_id, top)).pack(
-                side='right')
+            ttk.Button(frame, text="Delete", command=lambda a_id=appt[0]: self.confirm_delete(a_id, top)).pack(side='right')
 
     def confirm_cancel(self, appointment_id, top_window):
         if messagebox.askyesno("Confirm Cancellation", "Are you sure you want to cancel this appointment?"):
