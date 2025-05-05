@@ -1,3 +1,10 @@
+"""
+Appointment Management System - GUI Application
+
+This module defines the `LoginApp` class, which provides a graphical interface for managing appointments
+using the Tkinter library. The application supports user authentication, appointment booking, and role-based
+access control (admin and client).
+"""
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
