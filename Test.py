@@ -1,3 +1,10 @@
+"""
+Unit Tests for Appointment Management System
+
+This module contains unit tests for two key components of the system:
+- `DatabaseManager`: Responsible for client, appointment, and payment data.
+- `AuthManager`: Handles user registration and authentication.
+"""
 import unittest
 from database import DatabaseManager
 from Authentication import AuthManager
