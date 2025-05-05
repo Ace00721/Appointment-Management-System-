@@ -1,3 +1,9 @@
+"""
+Database Manager for Appointment and Payment System
+
+This module defines the `DatabaseManager` class, which provides methods for interacting
+with a SQLite database that manages clients, admins, payments, and appointments.
+"""
 import sqlite3
 
 class DatabaseManager:
